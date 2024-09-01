@@ -112,13 +112,41 @@ func executeCommand(command string, data []string) {
 			AddTransaction(qtyValid, SKU, idMember)
 		}
 	case "RESTOCK_ITEM":
-		panic("fix me")
+		var SKU = data[0]
+		var qty, err = strconv.Atoi(data[1])
+		if err != nil {
+			fmt.Errorf("[FAILED] your command is incorrect")
+		} else {
+			qtyValid := int32(qty)
+			result, err := RestockItem(SKU, qtyValid)
+			if err != nil {
+				fmt.Println("Error:", err)
+			} else {
+				fmt.Println(result)
+			}
+		}
+
 	case "TRANSACTION_ITEM_RECAP":
 		var SKU = data[0]
-		GetTransactionItem(SKU)
+		transactions, err := GetTransactionItem(SKU)
+		if err != nil {
+			fmt.Println("Error:", err)
+		} else { /*  Nanti benerin pin disini, outputnya*/
+			for i := 0; i < len(transactions); i++ {
+				fmt.Printf("%d. IdMember :  %d - SKU: %s, QTY: %.d - Price : %d \n ", i+1, transactions[i].IdMember, transactions[i].SKU, transactions[i].Qty, transactions[i].Price)
+			}
+		}
+
 	case "TRANSACTION_MEMBER_RECAP":
 		var idMember = data[0]
-		GetTransactionItem(idMember)
+		transactions, err := GetTransactionMember(idMember)
+		if err != nil {
+			fmt.Println("Error:", err)
+		} else { /*  */
+			for i := 0; i < len(transactions); i++ {
+				fmt.Printf("%d. IdMember :  %d - SKU: %s, QTY: %.d - Price : %d \n ", i+1, transactions[i].IdMember, transactions[i].SKU, transactions[i].Qty, transactions[i].Price)
+			}
+		}
 
 	case "EXIT":
 		os.Exit(1)

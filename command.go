@@ -145,7 +145,7 @@ func DeleteMember(idMember string) (string, error) {
 			idMemberOld := detailMember["IdMember"]
 			if idMember == idMemberOld {
 				Members = append(Members[:i], Members[i+1:]...)
-				fmt.Println(detailMember)
+				fmt.Sprintf("Successfully deleted member %s from list item", idMember)
 				return fmt.Sprintf("Successfully deleted member %s from list item", idMember), nil
 			}
 		}
@@ -171,16 +171,16 @@ func AddTransaction(qty int32, data ...string) (string, error) {
 					fmt.Print("STOK ABIS ")
 					return "", fmt.Errorf("insufficient stock for SKU %s", SKU)
 				}
-				itemTransaction, _ := GetTransactionItem(SKU)
-				memberTransaction, _ := GetTransactionMember(idMember)
-				fmt.Print("\nItem Transaction : ", itemTransaction)
-				fmt.Print("\nMember Transaction : ", memberTransaction)
+				// itemTransaction, _ := GetTransactionItem(SKU)
+				// memberTransaction, _ := GetTransactionMember(idMember)
+				// fmt.Print("\nItem Transaction : ", itemTransaction)
+				// fmt.Print("\nMember Transaction : ", memberTransaction)
 				// add member trtansacation
 				for _, member := range Members {
 					detailMember := member.GetData().(map[string]any)
 					oldId := detailMember["IdMember"]
 					if idMember == oldId && (SKU != "") {
-						newTransaction := Transaction{IdMember: &idMember, Qty: qty, Price: Price, SKU: SKU}
+						newTransaction := Transaction{IdMember: &idMember, Qty: qty, Price: Price * qty, SKU: SKU}
 						member.AddTransaction(newTransaction)
 					}
 				}
@@ -191,13 +191,10 @@ func AddTransaction(qty int32, data ...string) (string, error) {
 					detailItem := item.GetData().(map[string]any)
 					oldSKU := detailItem["SKU"]
 					if SKU == oldSKU && (SKU != "") {
-						newTransaction := Transaction{IdMember: &idMember, Qty: qty, Price: Price, SKU: SKU}
+						newTransaction := Transaction{IdMember: &idMember, Qty: qty, Price: Price * qty, SKU: SKU}
 						item.AddTransaction(newTransaction)
 					}
 				}
-
-				fmt.Println("OK NIH")
-
 				return fmt.Sprintf("[SUCCESS] Successfully added transaction item  %s", SKU), nil
 			}
 
@@ -214,18 +211,21 @@ func AddTransaction(qty int32, data ...string) (string, error) {
 	return "", fmt.Errorf("item %s is not in list of items", SKU)
 
 }
-func updateItemStock(SKU string, newStockQty int32) {
-	for _, item := range Items {
-		detailItem := item.GetData().(map[string]any)
-		if detailItem["SKU"] == SKU {
-			detailItem["StockQty"] = newStockQty
-			break
-		}
-	}
-}
 
 func RestockItem(SKU string, qty int32) (string, error) {
-	panic("fix me")
+	for _, item := range Items {
+		detailItem := item.GetData().(map[string]any)
+		oldSKU := detailItem["SKU"]
+		if SKU == oldSKU && (SKU != "") {
+			//harus dua kali kerja, karena dalam GO tidak bisa langsung a+=b, bisa tapi hanya menyimpan nilai sementara
+			newStock := detailItem["StockQty"].(int32) + qty
+			detailItem["StockQty"] = newStock
+			fmt.Println("new sotck : ", detailItem["StockQty"].(int32))
+			return fmt.Sprintf("Successfully added [%d] Stocks to  Item", detailItem["StockQty"].(int32)), nil
+		}
+	}
+	return "", fmt.Errorf("item %s is not in list of items", SKU)
+
 }
 
 func GetTransactionItem(SKU string) ([]Transaction, error) {
@@ -234,10 +234,8 @@ func GetTransactionItem(SKU string) ([]Transaction, error) {
 		detailMap := detailItem.(map[string]any)
 		// aman
 		var transaction = detailMap["Transactions"].([]Transaction)
-		fmt.Println("masunngkngkgn")
 		return transaction, nil
 	}
-	fmt.Print("GAMASUK")
 	return nil, fmt.Errorf("no SKU match")
 
 }
