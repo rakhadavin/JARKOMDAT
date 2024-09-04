@@ -42,38 +42,42 @@ func executeCommand(command string, data []string) {
 	switch command {
 
 	case "ADD_ITEM":
+		if len(data) < 4 {
+			fmt.Println("[FAILED] your input command is incorrect")
+			break
+
+		}
 		var SKU = data[0]
 		fmt.Printf("SKU : %s\n", SKU)
-		for _, item := range Items {
-			fmt.Println(item.GetData()) // Prints the memory address and type
-		}
 
 		var itemName = data[1]
 
 		var price, error_msg = strconv.Atoi(data[2])
 		if error_msg != nil {
-			fmt.Println("Error:", error_msg)
-			panic("Cannot parse from that type")
+			fmt.Println("[FAILED] your input command is incorrect")
+			break
 		}
 		var stockQty, error_msg2 = strconv.Atoi(data[3])
 		if error_msg2 != nil {
-			fmt.Println("Error:", error_msg)
-			panic("Cannot parse from that type")
+			fmt.Println("[FAILED] your input command is incorrect")
+			break
 		}
 
 		result, error := AddItem(SKU, itemName, int32(price), int32(stockQty))
 		if error != nil {
-			fmt.Println("Error:", error)
+			fmt.Println("[ERROR] ", error)
 		} else {
-			fmt.Println(result)
+			fmt.Println("[SUCCESS]", result)
 		}
 	case "DELETE_ITEM":
 		var SKU = data[0]
 		result, error := DeleteItem(SKU)
 		if error != nil {
-			fmt.Println("Error:", error)
+			fmt.Println("[FAILED] your input command is incorrect")
+			break
 		} else {
-			fmt.Println(result)
+			fmt.Println("[SUCCESS]", result)
+
 		}
 
 	case "ADD_MEMBER":
@@ -81,48 +85,62 @@ func executeCommand(command string, data []string) {
 		var memberName = data[0]
 		result, error := AddMember(idMember, memberName)
 		if error != nil {
-			fmt.Println("Error:", error)
+			fmt.Println("[FAILED] ", error)
+			break
 		} else {
-			fmt.Println(result)
+			fmt.Println("[SUCCESS]", result)
+
 		}
 
 	case "DELETE_MEMBER":
 		var idMember = data[0]
 		result, error := DeleteMember(idMember)
 		if error != nil {
-			fmt.Println("Error:", error)
+			fmt.Println("[FAILED] your input command is incorrect")
+			break
 		} else {
-			fmt.Println(result)
+			fmt.Println("[SUCCESS]", result)
+
 		}
 	case "ADD_TRANSACTION":
 		var qty, err = strconv.Atoi(data[0])
 		if err != nil {
-			fmt.Errorf("[FAILED] your command is incorrect")
+			fmt.Println("[FAILED] your input command is incorrect")
+			break
 		} else {
 			qtyValid := int32(qty)
 			var SKU = data[1]
 			var idMember = ""
-			fmt.Println("idmember : ", idMember)
 
 			if len(data) > 2 {
-				fmt.Println(len(data))
 				idMember = data[2]
 			}
 
-			AddTransaction(qtyValid, SKU, idMember)
+			result, err := AddTransaction(qtyValid, SKU, idMember)
+
+			if err != nil {
+				fmt.Println("[FAILED] ", err)
+				break
+			} else {
+				fmt.Println("[SUCCESS] ", result)
+
+			}
 		}
 	case "RESTOCK_ITEM":
 		var SKU = data[0]
 		var qty, err = strconv.Atoi(data[1])
 		if err != nil {
-			fmt.Errorf("[FAILED] your command is incorrect")
+			fmt.Println("[FAILED] your input command is incorrect")
+			break
 		} else {
 			qtyValid := int32(qty)
 			result, err := RestockItem(SKU, qtyValid)
 			if err != nil {
-				fmt.Println("Error:", err)
+				fmt.Println("[FAILED] your input command is incorrect")
+				break
 			} else {
-				fmt.Println(result)
+				fmt.Println("[SUCCESS]", result)
+
 			}
 		}
 
@@ -130,7 +148,7 @@ func executeCommand(command string, data []string) {
 		var SKU = data[0]
 		transactions, err := GetTransactionItem(SKU)
 		if err != nil {
-			fmt.Println("Error:", err)
+			fmt.Println("[FAILED] ", err)
 		} else { /*  Nanti benerin pin disini, outputnya*/
 			for i := 0; i < len(transactions); i++ {
 				fmt.Printf("%d. IdMember :  %d - SKU: %s, QTY: %.d - Price : %d \n ", i+1, transactions[i].IdMember, transactions[i].SKU, transactions[i].Qty, transactions[i].Price)
@@ -141,7 +159,8 @@ func executeCommand(command string, data []string) {
 		var idMember = data[0]
 		transactions, err := GetTransactionMember(idMember)
 		if err != nil {
-			fmt.Println("Error:", err)
+			fmt.Println("[FAILED] your input command is incorrect")
+			break
 		} else { /*  */
 			for i := 0; i < len(transactions); i++ {
 				fmt.Printf("%d. IdMember :  %d - SKU: %s, QTY: %.d - Price : %d \n ", i+1, transactions[i].IdMember, transactions[i].SKU, transactions[i].Qty, transactions[i].Price)
@@ -156,7 +175,12 @@ func executeCommand(command string, data []string) {
 }
 
 func PrintMessage(successMsg string, errMsg error) {
-	panic("fix me")
+	if errMsg != nil {
+		fmt.Println("[FAILED] your input command is incorrect")
+	} else { /*  */
+		fmt.Println("[SUCCESS] ", successMsg)
+
+	}
 }
 
 func PrintTransactionRecap(transactions []Transaction, errMsg error) {

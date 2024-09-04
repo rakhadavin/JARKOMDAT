@@ -23,7 +23,6 @@ type Member struct {
 // Tes implements Tool.
 
 func (m *Member) AddTransaction(data any) {
-	fmt.Println("\ncekii : ", data)
 
 	// Cek jika data adalah tipe Transaction
 	if transaction, ok := data.(Transaction); ok {
@@ -54,14 +53,12 @@ type Item struct {
 }
 
 func (it *Item) AddTransaction(data any) {
-	fmt.Println("\ncekii : ", data)
 
 	// Cek jika data adalah tipe Transaction
 	if transaction, ok := data.(Transaction); ok {
 		// Tambahkan transaksi ke slice Transactions
 		it.Transactions = append(it.Transactions, transaction)
 		it.StockQty -= transaction.Qty
-		fmt.Println("INI new qty : ", it.StockQty)
 	} else if transactions, ok := data.([]Transaction); ok {
 		// Jika data adalah slice dari Transaction, tambahkan semua transaksi
 		it.Transactions = append(it.Transactions, transactions...)
