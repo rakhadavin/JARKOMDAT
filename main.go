@@ -48,7 +48,6 @@ func executeCommand(command string, data []string) {
 
 		}
 		var SKU = data[0]
-		fmt.Printf("SKU : %s\n", SKU)
 
 		var itemName = data[1]
 
@@ -84,7 +83,7 @@ func executeCommand(command string, data []string) {
 
 	case "ADD_MEMBER":
 		var idMember = data[0]
-		var memberName = data[0]
+		var memberName = data[1]
 		result, err := AddMember(idMember, memberName)
 		if err != nil {
 			PrintMessage("", err)

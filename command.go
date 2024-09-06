@@ -143,6 +143,7 @@ func AddTransaction(qty int32, data ...string) (string, error) {
 		itemSelected = getDetailItem(SKU)
 		for _, item := range Items {
 			detailItem := item.GetData().(map[string]any)
+			fmt.Println("JUMLAHH : ", detailItem["StockQty"])
 			oldSKU := detailItem["SKU"]
 			if SKU == oldSKU && (SKU != "") {
 			}
@@ -152,8 +153,8 @@ func AddTransaction(qty int32, data ...string) (string, error) {
 				idMember = "-"
 			}
 			if itemMap, ok := itemSelected.(map[string]any); ok {
-				Price := itemMap["Price"].(int32)
-				if qty > Price {
+				stock := itemMap["StockQty"].(int32)
+				if qty > stock {
 					return "", fmt.Errorf("insufficient stock for SKU %s", SKU)
 				}
 				for _, member := range Members {
