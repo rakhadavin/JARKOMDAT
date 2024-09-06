@@ -71,7 +71,7 @@ func (it *Item) GetData() any {
 	return map[string]any{
 		"SKU":          it.SKU,
 		"ItemName":     it.ItemName,
-		"StockQty":     it.StockQty,
+		"StockQty":     &it.StockQty,
 		"Transactions": it.Transactions,
 		"Price":        it.Price,
 	}

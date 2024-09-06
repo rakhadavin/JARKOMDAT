@@ -98,7 +98,8 @@ func executeCommand(command string, data []string) {
 		var idMember = data[0]
 		result, error := DeleteMember(idMember)
 		if error != nil {
-			fmt.Println("[FAILED] your input command is incorrect")
+			PrintMessage("", error)
+
 			break
 		} else {
 			PrintMessage(result, nil)
@@ -107,7 +108,7 @@ func executeCommand(command string, data []string) {
 	case "ADD_TRANSACTION":
 		var qty, err = strconv.Atoi(data[0])
 		if err != nil {
-			fmt.Println("[FAILED] your input command is incorrect")
+			fmt.Println("[FAILED] yosur input command is incorrect")
 			break
 		} else {
 			qtyValid := int32(qty)
@@ -150,27 +151,12 @@ func executeCommand(command string, data []string) {
 	case "TRANSACTION_ITEM_RECAP":
 		var SKU = data[0]
 		transactions, err := GetTransactionItem(SKU)
-		if err != nil {
-			PrintMessage("", err)
-
-		} else { /*  Nanti benerin pin disini, outputnya*/
-			for i := 0; i < len(transactions); i++ {
-				fmt.Printf("SKU: %s, ID Member: %s, QTY: %.d, Total Price : %d\n ", transactions[i].SKU, *transactions[i].IdMember, transactions[i].Qty, transactions[i].Price)
-
-			}
-		}
+		PrintTransactionRecap(transactions, err)
 
 	case "TRANSACTION_MEMBER_RECAP":
 		var idMember = data[0]
 		transactions, err := GetTransactionMember(idMember)
-		if err != nil {
-			fmt.Println("[FAILED] your input command is incorrect")
-			break
-		} else { /*  */
-			for i := 0; i < len(transactions); i++ {
-				fmt.Printf("SKU: %s, ID Member: %s, QTY: %.d, Total Price : %d\n ", transactions[i].SKU, *transactions[i].IdMember, transactions[i].Qty, transactions[i].Price)
-			}
-		}
+		PrintTransactionRecap(transactions, err)
 
 	case "EXIT":
 		os.Exit(1)
@@ -181,7 +167,7 @@ func executeCommand(command string, data []string) {
 
 func PrintMessage(successMsg string, errMsg error) {
 	if errMsg != nil {
-		fmt.Println("[FAILED] your input command is incorrect")
+		fmt.Println("[FAILED] ", errMsg)
 	} else { /*  */
 		fmt.Println("[SUCCESS] ", successMsg)
 
@@ -189,6 +175,12 @@ func PrintMessage(successMsg string, errMsg error) {
 }
 
 func PrintTransactionRecap(transactions []Transaction, errMsg error) {
-	panic("fix me")
+	if errMsg != nil {
+		fmt.Println("[FAILED] your input command is incorrect")
+	} else { /*  */
+		for i := 0; i < len(transactions); i++ {
+			fmt.Printf("SKU: %s, ID Member: %s, QTY: %.d, Total Price : %d\n ", transactions[i].SKU, *transactions[i].IdMember, transactions[i].Qty, transactions[i].Price)
+		}
+	}
 
 }

@@ -72,7 +72,7 @@ func AddItem(SKU string, itemName string, price int32, stockQty int32) (string, 
 
 	var itemMasuk = Item{SKU: SKU, ItemName: itemName, Price: price, StockQty: stockQty}
 	Items = append(Items, &itemMasuk)
-	return fmt.Sprintf("SuccSuccessfully added item %s to list item", SKU), nil
+	return fmt.Sprintf("successfully added item %s to list item", SKU), nil
 }
 
 func DeleteItem(SKU string) (string, error) {
@@ -88,7 +88,7 @@ func DeleteItem(SKU string) (string, error) {
 			if SKU == oldSKU {
 				Items = append(Items[:i], Items[i+1:]...)
 
-				return fmt.Sprintf("Successfully deleted item %s to list item", SKU), nil
+				return fmt.Sprintf("successfully deleted item %s to list item", SKU), nil
 
 			}
 		}
@@ -103,7 +103,7 @@ func AddMember(idMember string, memberName string) (string, error) {
 	}
 	var memberMasuk = Member{IdMember: idMember, MemberName: memberName, Transactions: []Transaction{}} //ready for adding item
 	Members = append(Members, &memberMasuk)
-	return fmt.Sprintf("Successfully added item %s to list member", idMember), nil
+	return fmt.Sprintf("successfully added item %s to list member", idMember), nil
 }
 
 func DeleteMember(idMember string) (string, error) {
@@ -118,7 +118,7 @@ func DeleteMember(idMember string) (string, error) {
 			idMemberOld := detailMember["IdMember"]
 			if idMember == idMemberOld {
 				Members = append(Members[:i], Members[i+1:]...)
-				return fmt.Sprintf("Successfully deleted member %s from list item", idMember), nil
+				return fmt.Sprintf("successfully deleted member %s from list item", idMember), nil
 			}
 		}
 	}
@@ -143,7 +143,6 @@ func AddTransaction(qty int32, data ...string) (string, error) {
 		itemSelected = getDetailItem(SKU)
 		for _, item := range Items {
 			detailItem := item.GetData().(map[string]any)
-			fmt.Println("JUMLAHH : ", detailItem["StockQty"])
 			oldSKU := detailItem["SKU"]
 			if SKU == oldSKU && (SKU != "") {
 			}
@@ -153,9 +152,10 @@ func AddTransaction(qty int32, data ...string) (string, error) {
 				idMember = "-"
 			}
 			if itemMap, ok := itemSelected.(map[string]any); ok {
-				stock := itemMap["StockQty"].(int32)
-				if qty > stock {
-					return "", fmt.Errorf("insufficient stock for SKU %s", SKU)
+				stock := itemMap["StockQty"].(*int32)
+				Price := itemMap["Price"].(int32)
+				if qty > *stock {
+					return "", fmt.Errorf("stock qty for item %s is not sufficient", SKU)
 				}
 				for _, member := range Members {
 					detailMember := member.GetData().(map[string]any)
@@ -169,12 +169,13 @@ func AddTransaction(qty int32, data ...string) (string, error) {
 				for _, item := range Items {
 					detailItem := item.GetData().(map[string]any)
 					oldSKU := detailItem["SKU"]
+					price := detailItem["Price"].(int32)
 					if SKU == oldSKU && (SKU != "") {
-						newTransaction := Transaction{IdMember: &idMember, Qty: qty, Price: Price * qty, SKU: SKU}
+						newTransaction := Transaction{IdMember: &idMember, Qty: qty, Price: price * qty, SKU: SKU}
 						item.AddTransaction(newTransaction)
 					}
 				}
-				return fmt.Sprintf("Successfully added transaction item  %s", SKU), nil
+				return fmt.Sprintf("successfully added transaction item  %s", SKU), nil
 			}
 
 		} else if !idMemberExist && idMember != "" {
@@ -190,16 +191,16 @@ func AddTransaction(qty int32, data ...string) (string, error) {
 }
 
 func RestockItem(SKU string, qty int32) (string, error) {
-	for _, item := range Items {
-		detailItem := item.GetData().(map[string]any)
+	for i := range Items {
+		detailItem := Items[i].GetData().(map[string]any)
 		oldSKU := detailItem["SKU"]
 		if SKU == oldSKU && (SKU != "") {
 			//harus dua kali kerja, karena dalam GO tidak bisa langsung a+=b, bisa tapi hanya menyimpan nilai sementara
-			newStock := detailItem["StockQty"].(int32)
-			newStock += qty
+			newStock := detailItem["StockQty"].(*int32)
+			*newStock += qty
 			detailItem["StockQty"] = newStock
 
-			return fmt.Sprintf("Successfully added [%d] Stocks to  Item", detailItem["StockQty"].(int32)), nil
+			return fmt.Sprintf("Successfully added [%d] Stocks to  Item", detailItem["StockQty"].(*int32)), nil
 		}
 	}
 	return "", fmt.Errorf("item %s is not in list of items", SKU)
